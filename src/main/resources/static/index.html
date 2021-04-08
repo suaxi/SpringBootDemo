@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Demo</title>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+</head>
+<body>
+<div style="margin: 10px 0 10px 1%;width: 99%">
+    <div style="display: table-cell">
+        <form class="layui-form" id="search_form">
+            <div class="layui-input-block" style="display: table-cell">
+                <div class="layui-input-inline" style="width: 260px">
+                    <input type="text" name="title" placeholder="请输入文章标题"
+                           autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <div style="display: table-cell">
+                <button class="layui-btn layui-btn-sm layui-btn-danger" lay-submit lay-filter="search"
+                        style="margin-left: 15px"><i class="layui-icon">&#xe615;</i>搜&emsp;索
+                </button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">
+                    <i class="layui-icon">&#xe631;</i>重&emsp;置
+                </button>
+            </div>
+        </form>
+    </div>
+    <div style="display: table-cell">
+        <div style="display: table">
+            <!--新增文章-->
+            <div style="display: table-cell">
+                <button id="add" class="layui-btn layui-btn-sm" style="margin-left: 15px">
+                    <i class="layui-icon">&#xe608;</i> 新&emsp;增
+                </button>
+            </div>
+            <!--刷新-->
+            <div style="display: table-cell">
+                <button id="refresh" class="layui-btn layui-btn-normal layui-btn-sm" style="margin-left: 15px">
+                    <i class="layui-icon">&#xe669;</i> 刷&emsp;新
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<table id="article_table" lay-filter="article_bar"></table>
+<div class="layui-row" id="open_div" style="display: none">
+    <form id="add_form" class="layui-form" action="" style="margin-top: 20px;align: center">
+        <!--隐藏字段action，用来区分新增/编辑-->
+        <input type="hidden" name="action" id="action">
+        <!--隐藏字段id，主键-->
+        <input type="hidden" name="id" id="id">
+        <!--隐藏字段request_type，用于提供请求方式:get,post,put-->
+        <input type="hidden" name="request_type" id="request_type">
+
+        <div class="layui-form-item" style="display: table;width: 96%">
+            <div class="layui-form-item" style="display: table-cell;width: 50%">
+                <label class="layui-form-label">分类</label>
+                <div class="layui-input-block">
+                    <select name="type" lay-filter="type" lay-verify="required">
+                        <option value="">请选择</option>
+                        <option value="1">Java</option>
+                        <option value="2">Linux</option>
+                        <option value="3">数据库</option>
+                        <option value="4">笔记</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: table-cell;width: 50%">
+                <label class="layui-form-label">标题</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" placeholder="请输入标题"
+                           autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="display: table;width: 96%">
+            <div class="layui-form-item" style="display: table-cell;width: 50%">
+                <label class="layui-form-label">作者</label>
+                <div class="layui-input-block">
+                    <input type="text" name="author" placeholder="请输入作者"
+                           autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: table-cell;width: 50%">
+                <label class="layui-form-label">时间</label>
+                <div class="layui-input-block">
+                    <input type="text" name="createTime" placeholder="请输入时间"
+                           autocomplete="off" class="layui-input" id="time">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="display: table;width: 96%">
+            <div class="layui-form-item" style="display: table-cell;width: 100%">
+                <label class="layui-form-label">内容</label>
+                <div class="layui-input-block">
+                    <input type="text" name="content" placeholder="请输入内容"
+                           autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-left: 40%">
+            <div class="layui-btn-group">
+                <button class="layui-btn" lay-submit="" lay-filter="update_submit">提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/html" id="article_lineBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+</script>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/utils/common.js"></script>
+
+<script type="text/javascript">
+    layui.use(['table', 'layer', 'form', 'laypage', 'laydate'], function () {
+        var laydate = layui.laydate;
+        var table = layui.table;
+        var form = layui.form;
+
+        laydate.render({
+            elem: '#time',
+            type: 'datetime'
+        });
+
+        table.render({
+            elem: "#article_table",
+            id: 'tableList',
+            even: true, //开启隔行背景
+            url: '/article/articleList',
+            request: {
+                pageName: 'pageNum',
+                limitName: 'pageSize'
+            },
+            title: '文章列表',
+            page: true,
+            limit: 10,
+            limits: [1, 5, 10, 20, 50, 100],
+            cols:
+                [[{title: '序号', width: 60, align: 'center', type: 'numbers'},
+                    {
+                        file: 'type', title: '分类', width: '10%', align: 'center', templet: function (i) {
+                            if (i.type == 1) {
+                                return 'Java';
+                            } else if (i.type == 2) {
+                                return 'Linux';
+                            } else if (i.type == 3) {
+                                return '数据库';
+                            } else if (i.type == 4) {
+                                return '笔记';
+                            } else {
+                                return '未分类';
+                            }
+                        }
+                    },
+                    {field: 'title', title: '标题', width: '15%', align: 'center'},
+                    {field: 'author', title: '作者', width: '9%', align: 'center'},
+                    {field: 'content', title: '内容', align: 'center'},
+                    {field: 'createTime', title: '创建时间', width: '15%', align: 'center'},
+                    {
+                        fixed: 'right',
+                        title: '操作',
+                        toolbar: '#article_lineBar',
+                        width: 120,
+                        align: 'center'
+                    }
+                ]]
+        });
+
+        $("#refresh").click(function () {
+            //即时刷新
+            table.reload('tableList', {
+                where: '',
+                contentType: 'application/x-www-form-urlencoded',
+                page: {
+                    curr: 1
+                },
+                url: '/article/articleList',
+                method: 'get'
+            });
+        });
+
+        $("#add").click(function () {
+            var data = {};
+            data.action = 'addArticle';
+            data.request_type = 'post';
+
+            //如果在点击新增按钮之前先执行了"edit"事件，则会把form表单中的内容带过来，此处需做清空
+            $('#add_form')[0].reset();
+            form.render();
+
+            //调用打开弹层的工具方法
+            open_form("#open_div", data, '添加文章', '680px', '282px');
+        });
+
+        table.on('tool(article_bar)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            var id = data.id;
+
+            switch (layEvent) {
+                case 'edit':
+                    //根据编辑行为为form隐藏项赋值
+                    data.action = 'updateArticle';
+                    data.request_type = 'post';
+                    open_form("#open_div", data, '更新文章', '680px', '282px');
+                    break;
+                case 'del':
+                    layer.confirm('是否删除？', function (index) {
+                        obj.del(); //删除对应行(tr)的DOM结构，并更新缓存
+                        //后端执行删除
+                        $.ajax({
+                            type: "delete",
+                            url: "/article/" + id,
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (result) {
+                                layer.msg(result.msg, {icon: 1, time: 2000});
+                            }, error: function (e) {
+                                console.log(e, 'error');
+                                layer.msg("删除失败！", {icon: 1, time: 2000});
+                            }
+                        });
+                        layer.close(index);
+                    });
+                    break;
+            }
+        });
+
+        form.on('submit(update_submit)', function (data) {
+            var uri = data.field.action;
+            var type = data.field.request_type;
+            console.log(data);
+            $.ajax({
+                type: type,
+                url: '/article/' + uri,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data.field),
+                dataType: "json",
+                success: function (result) {
+                    if (result.code == "0") {
+                        table.reload('tableList', {
+                            contentType: "application/x-www-form-urlencoded",
+                            page: {
+                                curr: 1
+                            },
+                            url: '/article/articleList',
+                            method: 'get'
+                        });
+                        layer.msg(result.msg, {icon: 1, time: 2000});
+                    } else {
+                        layer.alert(result.msg, {icon: 2}, function () {
+                            layer.close(index);
+                        });
+                    }
+                }
+            });
+            layer.close(index); //关闭弹出层
+            return false;
+        });
+
+        //监听搜索按钮提交事件
+        form.on('submit(search)', function (data) {
+            var formData = data.field;
+            var count = checkForm("search_form");
+            if (count !== 0) {
+                //根据返回的json字符串模糊查询
+                tableReload('tableList', formData, "application/json;charset=utf-8", '/article/findByName', 'post');
+            } else {
+                parent.layer.msg('请先输入查询条件！', {icon: 2, time: 2000});
+            }
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
