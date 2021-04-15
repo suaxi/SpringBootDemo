@@ -25,4 +25,9 @@ public interface ArticleService extends IService<Article> {
      * @return
      */
     JSONObject findByName(JSONObject request);
+
+    /**
+     * 批量删除
+     */
+    JSONObject deleteBatch(String articleIds);
 }

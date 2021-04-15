@@ -11,6 +11,9 @@ import com.sw.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * @author suaxi
  * @date 2021/4/7 10:03
@@ -62,6 +65,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         } catch (Exception e) {
             result.put("code", "500");
             result.put("msg", "文章信息查询失败！");
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public JSONObject deleteBatch(String articleIds) {
+        JSONObject result = new JSONObject();
+        try {
+            mapper.deleteBatchIds(Arrays.stream(articleIds.split(",")).map(Integer::parseInt).collect(Collectors.toList()));
+            result.put("code", "0");
+            result.put("msg", "删除成功");
+        } catch (Exception e) {
+            result.put("code", "500");
+            result.put("msg", "删除失败！");
             e.printStackTrace();
         }
         return result;

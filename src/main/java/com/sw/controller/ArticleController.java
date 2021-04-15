@@ -44,23 +44,13 @@ public class ArticleController extends BaseController {
         return success(result);
     }
 
-    @ApiOperation("删除文章")
+    @ApiOperation(value = "批量删除", notes = "删除单条记录和批量删除都使用该接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "aid", value = "文章id", required = true, paramType = "body", dataType = "String")
+            @ApiImplicitParam(name = "articleIds", value = "文章id", required = true, paramType = "body", dataType = "String")
     })
-    @DeleteMapping("/{aid}")
-    public ResponseEntity<?> deleteById(@PathVariable("aid") String aid) {
-        JSONObject result = new JSONObject();
-        try {
-            service.removeById(aid);
-            result.put("code", "0");
-            result.put("msg", "删除成功");
-        } catch (Exception e) {
-            result.put("code", "500");
-            result.put("msg", "删除失败");
-            e.printStackTrace();
-        }
-        return success(result);
+    @DeleteMapping("/{articleIds}")
+    public ResponseEntity<JSONObject> deleteBatch(@PathVariable("articleIds") String articleIds) {
+        return success(service.deleteBatch(articleIds));
     }
 
     @ApiOperation("更新文章")
