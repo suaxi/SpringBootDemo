@@ -17,14 +17,14 @@ public class MetaObjectHandler implements com.baomidou.mybatisplus.core.handlers
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        log.info("执行create_time自动填充！");
+        //log.info("执行create_time自动填充！");
         this.setFieldValByName("createTime", new Date(), metaObject);
         this.setFieldValByName("updateTime", new Date(), metaObject);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        log.info("执行update_time自动填充！");
+        //log.info("执行update_time自动填充！");
         this.setFieldValByName("updateTime", new Date(), metaObject);
     }
 }
