@@ -1,21 +1,33 @@
 package com.sw.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
+import com.sw.dto.ArticleDto;
 import com.sw.pojo.Article;
 import com.sw.service.ArticleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author suaxi
  * @date 2021/4/7 10:16
  * @Description
  */
+@Slf4j
 @Api(tags = "文章接口")
 @RestController
 @RequestMapping("/article")
@@ -82,5 +94,29 @@ public class ArticleController extends BaseController {
     @PostMapping("/findByName")
     public ResponseEntity<JSONObject> findByName(@RequestBody JSONObject request) {
         return success(service.findByName(request));
+    }
+
+    @ApiOperation("导出Excel")
+    @GetMapping("/export")
+    public void export(HttpServletResponse response) {
+        try {
+            //内容格式及编码
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("UTF-8");
+            List<ArticleDto> resultList = new ArrayList<>();
+            service.list().forEach(item -> {
+                ArticleDto articleDto = new ArticleDto();
+                BeanUtils.copyProperties(item, articleDto);
+                resultList.add(articleDto);
+            });
+            String fileName = URLEncoder.encode("文章", "UTF-8");
+            //导出文件名
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+            //sheet名称
+            EasyExcel.write(response.getOutputStream(), ArticleDto.class).sheet("文章").doWrite(resultList);
+        } catch (IOException e) {
+            log.error("Excel导出失败！");
+            e.printStackTrace();
+        }
     }
 }

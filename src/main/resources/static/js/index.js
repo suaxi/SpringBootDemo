@@ -67,6 +67,11 @@ layui.use(['table', 'layer', 'form', 'laypage', 'laydate'], function () {
         });
     });
 
+    $("#export").click(function () {
+        //导出Excel
+        window.open("/article/export");
+    });
+
     $("#add").click(function () {
         var data = {};
         data.action = 'addArticle';
